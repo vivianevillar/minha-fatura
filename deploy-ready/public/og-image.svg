@@ -1,0 +1,62 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#FAFAF8"/>
+  <rect x="0" y="0" width="8" height="630" fill="#1a1a1a"/>
+  
+  <!-- left content -->
+  <text x="80" y="120" font-family="Helvetica Neue,Arial,sans-serif" font-size="18" font-weight="700" fill="#bbb" letter-spacing="3">✦ POWERED BY IA</text>
+  
+  <text x="80" y="220" font-family="Helvetica Neue,Arial,sans-serif" font-size="72" font-weight="300" fill="#1a1a1a" letter-spacing="-2">Chega de adivinhar</text>
+  <text x="80" y="310" font-family="Helvetica Neue,Arial,sans-serif" font-size="72" font-weight="800" fill="#1a1a1a" letter-spacing="-2">o que é de quem.</text>
+  
+  <!-- pain box -->
+  <rect x="80" y="345" width="640" height="110" rx="12" fill="#F0F0EC"/>
+  <rect x="80" y="345" width="5" height="110" fill="#1a1a1a" rx="2"/>
+  <text x="104" y="385" font-family="Helvetica Neue,Arial,sans-serif" font-size="22" fill="#666" font-style="italic">Todo mês a mesma dúvida — aquela parcela</text>
+  <text x="104" y="415" font-family="Helvetica Neue,Arial,sans-serif" font-size="22" fill="#1a1a1a" font-weight="700">é sua ou da outra pessoa?</text>
+  <text x="104" y="443" font-family="Helvetica Neue,Arial,sans-serif" font-size="22" fill="#666" font-style="italic">Aquele lançamento estranho, onde foi mesmo?</text>
+
+  <!-- right: upload box -->
+  <rect x="800" y="80" width="320" height="360" rx="16" fill="#fff" stroke="#E5E5E0" stroke-width="1.5"/>
+  
+  <!-- doc+lupa icon -->
+  <rect x="876" y="114" width="56" height="56" rx="12" fill="#F4F4F0"/>
+  <rect x="889" y="124" width="24" height="30" rx="3" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <line x1="894" y1="133" x2="908" y2="133" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="894" y1="139" x2="908" y2="139" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="894" y1="145" x2="901" y2="145" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="918" cy="152" r="8" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <line x1="915" y1="152" x2="921" y2="152" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="918" y1="149" x2="918" y2="155" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <text x="960" y="148" font-family="Helvetica Neue,Arial,sans-serif" font-size="16" font-weight="600" fill="#1a1a1a" text-anchor="middle">Arraste ou selecione</text>
+  <text x="960" y="168" font-family="Helvetica Neue,Arial,sans-serif" font-size="16" font-weight="600" fill="#1a1a1a" text-anchor="middle">sua fatura</text>
+  <text x="960" y="192" font-family="Helvetica Neue,Arial,sans-serif" font-size="13" fill="#ccc" text-anchor="middle">Arquivo PDF · até 10MB</text>
+  
+  <rect x="888" y="210" width="144" height="40" rx="8" fill="#1a1a1a"/>
+  <text x="960" y="235" font-family="Helvetica Neue,Arial,sans-serif" font-size="15" font-weight="600" fill="#fff" text-anchor="middle">Selecionar PDF</text>
+  
+  <!-- chips -->
+  <rect x="820" y="270" width="72" height="24" rx="12" fill="#F4F4F0"/>
+  <text x="856" y="286" font-family="Helvetica Neue,Arial,sans-serif" font-size="12" fill="#999" text-anchor="middle">Nubank</text>
+  <rect x="900" y="270" width="84" height="24" rx="12" fill="#F4F4F0"/>
+  <text x="942" y="286" font-family="Helvetica Neue,Arial,sans-serif" font-size="12" fill="#999" text-anchor="middle">Santander</text>
+  <rect x="992" y="270" width="50" height="24" rx="12" fill="#F4F4F0"/>
+  <text x="1017" y="286" font-family="Helvetica Neue,Arial,sans-serif" font-size="12" fill="#999" text-anchor="middle">Itaú</text>
+  
+  <rect x="840" y="304" width="80" height="24" rx="12" fill="#F4F4F0"/>
+  <text x="880" y="320" font-family="Helvetica Neue,Arial,sans-serif" font-size="12" fill="#999" text-anchor="middle">e outros</text>
+
+  <!-- steps -->
+  <rect x="820" y="344" width="280" height="28" rx="6" fill="#F4F4F0"/>
+  <text x="838" y="362" font-family="Helvetica Neue,Arial,sans-serif" font-size="12" fill="#888">1 · Suba o PDF da fatura</text>
+  <rect x="820" y="378" width="280" height="28" rx="6" fill="#F4F4F0"/>
+  <text x="838" y="396" font-family="Helvetica Neue,Arial,sans-serif" font-size="12" fill="#888">2 · A IA extrai tudo automaticamente</text>
+  <rect x="820" y="412" width="280" height="28" rx="6" fill="#F4F4F0"/>
+  <text x="838" y="430" font-family="Helvetica Neue,Arial,sans-serif" font-size="12" fill="#888">3 · Atribua e exporte em Excel</text>
+
+  <!-- footer -->
+  <rect x="0" y="558" width="1200" height="72" fill="#1a1a1a"/>
+  <text x="80" y="600" font-family="Helvetica Neue,Arial,sans-serif" font-size="20" font-weight="700" fill="#fff">Minha Fatura Organizada</text>
+  <text x="80" y="622" font-family="Helvetica Neue,Arial,sans-serif" font-size="14" fill="rgba(255,255,255,0.4)">Fatura Organizada · por Viviane Villar · 2026</text>
+  <text x="1120" y="600" font-family="Helvetica Neue,Arial,sans-serif" font-size="13" fill="rgba(255,255,255,0.3)" text-anchor="end">minha-fatura.netlify.app</text>
+</svg>

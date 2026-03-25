@@ -17,6 +17,7 @@
 <meta name="twitter:description" content="Chega de adivinhar o que é de quem. Suba o PDF da fatura e organize em segundos.">
 <meta name="twitter:image" content="https://minha-fatura.netlify.app/og-image.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:#F2F2EE;color:#1a1a1a;font-size:16px;line-height:1.6;min-height:100vh}
@@ -568,24 +569,46 @@ document.getElementById('pdfInput').addEventListener('change',function(){
   if(this.files&&this.files[0]){processFile(this.files[0]);this.value='';}
 });
 
+async function extractPdfText(file){
+  var arrayBuffer=await file.arrayBuffer();
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  var pdf=await pdfjsLib.getDocument({data:arrayBuffer}).promise;
+  var text='';
+  for(var i=1;i<=pdf.numPages;i++){
+    var page=await pdf.getPage(i);
+    var content=await page.getTextContent();
+    text+=content.items.map(function(item){return item.str;}).join(' ')+'\n';
+  }
+  return text.trim();
+}
+
 async function processFile(file){
   document.getElementById('uploadScreen').style.display='none';
   document.getElementById('errBox').style.display='none';
   document.getElementById('loadMsg').textContent='Lendo a fatura...';
   document.getElementById('loadScreen').style.display='block';
   await new Promise(function(r){setTimeout(r,50);});
-  var b64;
+  var pdfText;
   try{
-    b64=await new Promise(function(res,rej){
-      var r=new FileReader();
-      r.onload=function(){res(r.result.split(',')[1]);};
-      r.onerror=function(){rej(new Error('Erro ao ler arquivo'));};
-      r.readAsDataURL(file);
-    });
-  }catch(e){return showErr(e.message);}
-  document.getElementById('loadMsg').textContent='Extraindo transações com IA... (pode levar até 1 minuto)';
+    pdfText=await extractPdfText(file);
+  }catch(e){
+    pdfText=null;
+  }
+  document.getElementById('loadMsg').textContent='Extraindo transações com IA...';
   try{
-    var res=await fetch('/.netlify/functions/extract',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pdfBase64:b64})});
+    var body;
+    if(pdfText&&pdfText.length>100){
+      body=JSON.stringify({pdfText:pdfText});
+    }else{
+      var b64=await new Promise(function(res,rej){
+        var r=new FileReader();
+        r.onload=function(){res(r.result.split(',')[1]);};
+        r.onerror=function(){rej(new Error('Erro ao ler arquivo'));};
+        r.readAsDataURL(file);
+      });
+      body=JSON.stringify({pdfBase64:b64});
+    }
+    var res=await fetch('/.netlify/functions/extract',{method:'POST',headers:{'Content-Type':'application/json'},body:body});
     var data=await res.json();
     if(!res.ok)return showErr(data.error||'Erro ao processar');
     startApp(data);

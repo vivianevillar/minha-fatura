@@ -573,13 +573,42 @@ async function extractPdfText(file){
   var arrayBuffer=await file.arrayBuffer();
   pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   var pdf=await pdfjsLib.getDocument({data:arrayBuffer}).promise;
-  var text='';
+  var lines=[];
   for(var i=1;i<=pdf.numPages;i++){
     var page=await pdf.getPage(i);
     var content=await page.getTextContent();
-    text+=content.items.map(function(item){return item.str;}).join(' ')+'\n';
+    var byY={};
+    content.items.forEach(function(item){
+      var y=Math.round(item.transform[5]);
+      if(!byY[y])byY[y]=[];
+      byY[y].push(item.str);
+    });
+    Object.keys(byY).sort(function(a,b){return b-a;}).forEach(function(y){
+      lines.push(byY[y].join(' '));
+    });
   }
-  return text.trim();
+  return filterFaturaLines(lines);
+}
+
+function filterFaturaLines(lines){
+  var result=[];
+  var txPattern=/^\d{2}\/\d{2}\s+\S/;
+  var portadorPattern=/\(final\s+\d{4}\)/i;
+  var stop=false;
+  lines.forEach(function(line){
+    if(stop)return;
+    var l=line.trim();
+    if(!l||l.length<4)return;
+    // Para completamente ao chegar nas parcelas futuras
+    if(/próximas faturas|compras parceladas.*próxim/i.test(l)){stop=true;return;}
+    if(txPattern.test(l))return result.push(l);
+    if(portadorPattern.test(l))return result.push(l);
+    if(/lançamentos no cartão/i.test(l))return result.push(l);
+    if(/vencimento|fechamento/i.test(l)&&l.length<80)return result.push(l);
+  });
+  var text=result.join('\n');
+  console.log('[MFA] Texto filtrado:',text.length,'chars,',result.length,'linhas');
+  return text;
 }
 
 async function processFile(file){
@@ -598,8 +627,11 @@ async function processFile(file){
   try{
     var body;
     if(pdfText&&pdfText.length>100){
-      body=JSON.stringify({pdfText:pdfText});
+      var truncated=pdfText.substring(0,25000);
+      console.log('[MFA] Modo texto, chars:',truncated.length);
+      body=JSON.stringify({pdfText:truncated});
     }else{
+      console.log('[MFA] Fallback base64');
       var b64=await new Promise(function(res,rej){
         var r=new FileReader();
         r.onload=function(){res(r.result.split(',')[1]);};

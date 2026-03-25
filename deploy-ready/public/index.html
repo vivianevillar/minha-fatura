@@ -620,31 +620,27 @@ async function processFile(file){
   var pdfText;
   try{
     pdfText=await extractPdfText(file);
+    console.log('[MFA] Texto extraido:',pdfText?pdfText.length:0,'chars');
   }catch(e){
-    pdfText=null;
+    console.error('[MFA] Erro pdf.js:',e.message);
+    return showErr('Nao foi possivel ler o PDF. Verifique se o arquivo nao esta protegido.');
   }
-  document.getElementById('loadMsg').textContent='Extraindo transações com IA...';
+  if(!pdfText||pdfText.length<50){
+    return showErr('PDF sem texto legivel. O arquivo pode estar escaneado ou protegido.');
+  }
+  document.getElementById('loadMsg').textContent='Extraindo transacoes com IA...';
   try{
-    var body;
-    if(pdfText&&pdfText.length>100){
-      var truncated=pdfText.substring(0,25000);
-      console.log('[MFA] Modo texto, chars:',truncated.length);
-      body=JSON.stringify({pdfText:truncated});
-    }else{
-      console.log('[MFA] Fallback base64');
-      var b64=await new Promise(function(res,rej){
-        var r=new FileReader();
-        r.onload=function(){res(r.result.split(',')[1]);};
-        r.onerror=function(){rej(new Error('Erro ao ler arquivo'));};
-        r.readAsDataURL(file);
-      });
-      body=JSON.stringify({pdfBase64:b64});
+    console.log('[MFA] Enviando para API:',pdfText.length,'chars');
+    var res=await fetch('/.netlify/functions/extract',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pdfText:pdfText})});
+    var rawText=await res.text();
+    var data;
+    try{data=JSON.parse(rawText);}catch(je){
+      console.error('[MFA] Resposta invalida:',rawText.substring(0,300));
+      return showErr('Tempo de processamento excedido. Tente novamente.');
     }
-    var res=await fetch('/.netlify/functions/extract',{method:'POST',headers:{'Content-Type':'application/json'},body:body});
-    var data=await res.json();
     if(!res.ok)return showErr(data.error||'Erro ao processar');
     startApp(data);
-  }catch(e){showErr('Erro de conexão: '+e.message);}
+  }catch(e){showErr('Erro de conexao: '+e.message);}
 }
 
 function showErr(msg){

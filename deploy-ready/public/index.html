@@ -568,24 +568,73 @@ document.getElementById('pdfInput').addEventListener('change',function(){
   if(this.files&&this.files[0]){processFile(this.files[0]);this.value='';}
 });
 
+async function extractTextFromPDF(arrayBuffer) {
+  return new Promise(function(resolve) {
+    // Load PDF.js dynamically
+    if (window.pdfjsLib) {
+      doExtract();
+    } else {
+      var s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      s.onload = doExtract;
+      s.onerror = function() { resolve(null); };
+      document.head.appendChild(s);
+    }
+    function doExtract() {
+      try {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        pdfjsLib.getDocument({data: arrayBuffer}).promise.then(function(pdf) {
+          var pages = [];
+          var total = pdf.numPages;
+          for (var i = 1; i <= total; i++) {
+            pages.push(pdf.getPage(i).then(function(page) {
+              return page.getTextContent().then(function(c) {
+                return c.items.map(function(item) { return item.str; }).join(' ');
+              });
+            }));
+          }
+          Promise.all(pages).then(function(texts) {
+            resolve(texts.join('\n'));
+          }).catch(function() { resolve(null); });
+        }).catch(function() { resolve(null); });
+      } catch(e) { resolve(null); }
+    }
+  });
+}
+
 async function processFile(file){
   document.getElementById('uploadScreen').style.display='none';
   document.getElementById('errBox').style.display='none';
   document.getElementById('loadMsg').textContent='Lendo a fatura...';
   document.getElementById('loadScreen').style.display='block';
   await new Promise(function(r){setTimeout(r,50);});
-  var b64;
+
+  // Try to extract text first (much faster than sending PDF)
+  var arrayBuffer = await file.arrayBuffer();
+  document.getElementById('loadMsg').textContent='Extraindo texto do PDF...';
+  var pdfText = await extractTextFromPDF(arrayBuffer.slice(0));
+  
+  var payload;
+  if (pdfText && pdfText.trim().length > 200) {
+    console.log('Texto extraído:', pdfText.length, 'chars');
+    payload = {pdfText: pdfText.substring(0, 15000)}; // limit to 15k chars
+  } else {
+    console.log('Sem texto, usando base64');
+    var b64;
+    try {
+      b64 = await new Promise(function(res,rej){
+        var r=new FileReader();
+        r.onload=function(){res(r.result.split(',')[1]);};
+        r.onerror=function(){rej(new Error('Erro ao ler arquivo'));};
+        r.readAsDataURL(file);
+      });
+    } catch(e) { return showErr(e.message); }
+    payload = {pdfBase64: b64};
+  }
+
+  document.getElementById('loadMsg').textContent='Analisando com IA... (pode levar ~20s)';
   try{
-    b64=await new Promise(function(res,rej){
-      var r=new FileReader();
-      r.onload=function(){res(r.result.split(',')[1]);};
-      r.onerror=function(){rej(new Error('Erro ao ler arquivo'));};
-      r.readAsDataURL(file);
-    });
-  }catch(e){return showErr(e.message);}
-  document.getElementById('loadMsg').textContent='Extraindo transações com IA... (pode levar ~20s)';
-  try{
-    var res=await fetch('/.netlify/functions/extract',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pdfBase64:b64})});
+    var res=await fetch('/.netlify/functions/extract',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     var data=await res.json();
     if(!res.ok)return showErr(data.error||'Erro ao processar');
     startApp(data);
